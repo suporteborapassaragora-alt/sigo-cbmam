@@ -1,36 +1,54 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import {
-  Shield,
-  Truck,
   Users,
+  Truck,
   CalendarCheck,
   FileText,
+  Shield,
+  ArrowRight,
+  ArrowLeft,
+  LogOut,
+  Bell,
+  CheckCircle2,
   AlertTriangle,
   Clock,
-  CheckCircle2,
-  ChevronRight,
-  Flame,
   Radio,
   FileCheck,
   ExternalLink,
-  Award,
-  Layers,
-  Search,
-  Bell,
+  ChevronRight,
   Check,
   X,
-  RefreshCw,
-  FolderLock
+  Search,
+  PlusCircle,
+  FileBadge2,
+  Sparkles,
+  Lock,
+  UserCheck
 } from "lucide-react";
 
-export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"todos" | "efetivo" | "logistica" | "escalas" | "documental">("todos");
-  const [selectedModal, setSelectedModal] = useState<string | null>(null);
+export default function App() {
+  // Estado de Autenticação
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [rgMilitar, setRgMilitar] = useState("");
+  const [senha, setSenha] = useState("");
+  
+  // Usuário Atual
+  const [usuario, setUsuario] = useState({
+    nome: "Maj BM Rodrigo Paes",
+    posto: "Major BM",
+    funcao: "Comandante do 17º GBM",
+    unidade: "17º GBM - Itacoatiara / AM",
+    avatar: "MR"
+  });
+
+  // Módulo ativo: null = Hub de Quadros Grandes; ou "efetivo", "logistica", "escalas", "documental"
+  const [moduloAtivo, setModuloAtivo] = useState<string | null>(null);
 
   // Estados de demonstração interativa
-  const [permutasPendentes, setPermutasPendentes] = useState([
+  const [permutas, setPermutas] = useState([
     {
       id: "perm-1",
       solicitante: "Sd BM Rocha",
@@ -38,7 +56,7 @@ export default function AdminDashboard() {
       dataOriginal: "14/05/2026",
       dataPaga: "22/05/2026",
       posto: "Guarnição Alfa (ABT-01)",
-      motivo: "Comparecimento a audiência judicial em Manaus devidamente comprovada.",
+      motivo: "Comparecimento a audiência judicial em Manaus com comprovação anexa.",
       status: "AGUARDANDO_COMANDO"
     },
     {
@@ -48,573 +66,635 @@ export default function AdminDashboard() {
       dataOriginal: "18/05/2026",
       dataPaga: "25/05/2026",
       posto: "Guarnição Bravo (UR-02)",
-      motivo: "Participação em instrução de especialização de resgate veicular pesado.",
+      motivo: "Participação em instrução de resgate veicular pesado.",
       status: "AGUARDANDO_COMANDO"
     }
   ]);
 
-  const aprovarPermuta = (id: string, deferida: boolean) => {
-    setPermutasPendentes(prev => prev.filter(p => p.id !== id));
-    alert(deferida ? "Permuta DEFERIDA pelo Comando! Escala atualizada e documento timbrado arquivado." : "Permuta INDEFERIDA pelo Comando.");
+  const handleLogin = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsLoggedIn(true);
   };
 
+  const handleLoginDemo = (tipo: "cmt" | "oficial") => {
+    if (tipo === "cmt") {
+      setUsuario({
+        nome: "Maj BM Rodrigo Paes",
+        posto: "Major BM",
+        funcao: "Comandante do 17º GBM",
+        unidade: "17º GBM - Itacoatiara / AM",
+        avatar: "MR"
+      });
+    } else {
+      setUsuario({
+        nome: "Cap BM Juliana Matos",
+        posto: "Capitão BM",
+        funcao: "Oficial de Dia",
+        unidade: "17º GBM - Itacoatiara / AM",
+        avatar: "JM"
+      });
+    }
+    setIsLoggedIn(true);
+  };
+
+  const aprovarPermuta = (id: string, deferida: boolean) => {
+    setPermutas(prev => prev.filter(p => p.id !== id));
+    alert(deferida ? "Permuta homologada e DEFERIDA com sucesso! Escala atualizada." : "Permuta INDEFERIDA pelo Comando.");
+  };
+
+  // =========================================================================
+  // 1. TELA DE LOGIN (TEMA CLARO, CLEAN E PROFISSIONAL)
+  // =========================================================================
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-100 flex flex-col justify-center items-center px-4 py-8">
+        <div className="w-full max-w-md bg-white border border-slate-200/80 rounded-3xl shadow-xl shadow-slate-200/60 p-8 flex flex-col items-center">
+          {/* Logo Oficial Enviada */}
+          <div className="relative w-36 h-36 mb-2">
+            <Image
+              src="/logo.png"
+              alt="SIGO 17º GBM"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-black text-slate-900 tracking-tight">
+              SIGO — 17º GBM
+            </h1>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              Sistema Integrado de Gestão Operacional e Administrativa
+            </p>
+            <div className="inline-block mt-2 px-2.5 py-0.5 bg-red-50 text-red-700 text-[11px] font-semibold rounded-full border border-red-200">
+              Corpo de Bombeiros Militar de Itacoatiara - AM
+            </div>
+          </div>
+
+          {/* Formulário de Acesso */}
+          <form onSubmit={handleLogin} className="w-full space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                RG Militar ou E-mail
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: BM-12345 ou militar@cbm.am.gov.br"
+                value={rgMilitar}
+                onChange={e => setRgMilitar(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Senha de Acesso
+              </label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={senha}
+                onChange={e => setSenha(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold text-sm rounded-xl shadow-lg shadow-red-600/30 transition-all flex items-center justify-center gap-2"
+            >
+              <Lock className="w-4 h-4" /> Acessar Sistema
+            </button>
+          </form>
+
+          {/* Atalhos de Acesso Rápido para Demonstração */}
+          <div className="w-full mt-6 pt-5 border-t border-slate-100 text-center">
+            <span className="text-[11px] uppercase font-bold text-slate-400 tracking-wider">
+              Acesso Rápido de Teste
+            </span>
+            <div className="grid grid-cols-2 gap-2 mt-2.5">
+              <button
+                type="button"
+                onClick={() => handleLoginDemo("cmt")}
+                className="py-2 px-3 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 border border-slate-200"
+              >
+                <UserCheck className="w-3.5 h-3.5 text-red-600" />
+                Como Comandante
+              </button>
+              <button
+                type="button"
+                onClick={() => handleLoginDemo("oficial")}
+                className="py-2 px-3 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 border border-slate-200"
+              >
+                <Shield className="w-3.5 h-3.5 text-blue-600" />
+                Como Oficial de Dia
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-slate-400 mt-6 text-center">
+          SIGO-CBMAM v2.0 • 17º Batalhão Bombeiro Militar de Itacoatiara
+        </p>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 2. PAINEL PÓS-LOGIN (PORTAL LIMPO E QUADROS GRANDES COM OS MÓDULOS)
+  // =========================================================================
   return (
-    <div className="min-h-screen bg-[#070b12] text-slate-100 flex flex-col font-sans">
-      {/* BARRA SUPERIOR DE COMANDO MILITAR */}
-      <header className="border-b border-slate-800 bg-[#0c1322] sticky top-0 z-50 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="h-11 w-11 rounded-lg bg-gradient-to-br from-red-600 via-red-700 to-amber-700 flex items-center justify-center shadow-lg shadow-red-950/50 border border-red-500/30">
-              <Flame className="w-6 h-6 text-white animate-pulse" />
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
+      {/* HEADER SUPERIOR LIMPO E INSTITUCIONAL */}
+      <header className="bg-white border-b border-slate-200/80 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative w-11 h-11 cursor-pointer" onClick={() => setModuloAtivo(null)}>
+              <Image
+                src="/logo.png"
+                alt="SIGO 17º GBM"
+                fill
+                className="object-contain"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-base tracking-wider text-white">SIGO-CBMAM</span>
-                <span className="text-[10px] uppercase font-bold tracking-widest bg-red-950/80 text-red-400 px-2 py-0.5 rounded border border-red-800/60">
-                  Unidade Itacoatiara
+                <span className="font-black text-slate-900 tracking-tight text-base">
+                  SIGO
+                </span>
+                <span className="text-[11px] font-bold uppercase tracking-wider bg-red-100 text-red-700 px-2 py-0.5 rounded">
+                  17º GBM Itacoatiara
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-medium">
-                Corpo de Bombeiros Militar do Estado do Amazonas • Posto Avançado Rio Amazonas
+              <p className="text-[11px] text-slate-500 font-medium">
+                Corpo de Bombeiros Militar do Estado do Amazonas
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs">
-            <div className="hidden md:flex items-center gap-3 bg-slate-900/90 px-3.5 py-1.5 rounded-lg border border-slate-800">
-              <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping" />
-              <span className="text-slate-300 font-semibold">Prontidão:</span>
-              <span className="text-emerald-400 font-bold uppercase tracking-wider">Guarnição Alfa</span>
-              <span className="text-slate-600">|</span>
-              <span className="text-slate-400">Oficial de Dia: <strong className="text-slate-200">Cap BM Juliana</strong></span>
+          {/* Perfil do Militar e Botão Sair */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 bg-slate-100/80 py-1.5 px-3 rounded-xl border border-slate-200">
+              <div className="w-8 h-8 rounded-full bg-red-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
+                {usuario.avatar}
+              </div>
+              <div className="text-left hidden sm:block">
+                <div className="text-xs font-bold text-slate-800 leading-tight">
+                  {usuario.nome}
+                </div>
+                <div className="text-[10px] text-slate-500 font-medium">
+                  {usuario.funcao}
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="h-9 w-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-slate-200 text-xs">
-                MR
-              </div>
-              <div className="hidden lg:block text-left">
-                <div className="text-xs font-semibold text-slate-200 leading-tight">Maj BM Rodrigo</div>
-                <div className="text-[10px] text-amber-400 font-medium">Comandante da Unidade</div>
-              </div>
-            </div>
+            <button
+              onClick={() => {
+                setIsLoggedIn(false);
+                setModuloAtivo(null);
+              }}
+              title="Encerrar Sessão"
+              className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </header>
 
-      {/* SUB-HEADER: NAVEGAÇÃO DE CATEGORIAS E STATUS GERAL */}
-      <nav className="bg-[#0b101d] border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-2.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between overflow-x-auto">
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            {[
-              { id: "todos", label: "Visão Geral dos Quadros", icon: Layers },
-              { id: "efetivo", label: "1. Efetivo & Pessoal", icon: Users },
-              { id: "logistica", label: "2. Logística & Materiais", icon: Truck },
-              { id: "escalas", label: "3. Escalas & SEGs", icon: CalendarCheck },
-              { id: "documental", label: "4. Documentos & Permutas", icon: FileText },
-            ].map(tab => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
-                    isActive
-                      ? "bg-red-600 text-white shadow-md shadow-red-950/60"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="text-[11px] text-slate-400 font-mono hidden sm:block">
-            SISTEMA OPERACIONAL ATIVO • CBMAM 2026
-          </div>
-        </div>
-      </nav>
-
-      {/* ÁREA PRINCIPAL */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6 w-full">
-        {/* BARRA DE MÉTRICAS RÁPIDAS */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#0e1626] border border-slate-800/80 rounded-xl p-4 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 h-1 w-full bg-red-600" />
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Efetivo de Prontidão</p>
-                <h3 className="text-2xl font-black text-white mt-1">28 <span className="text-xs font-normal text-emerald-400">/ 32 ativos</span></h3>
-              </div>
-              <div className="p-2.5 rounded-lg bg-red-950/40 border border-red-900/40 text-red-400">
-                <Users className="w-5 h-5" />
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> 4 militares em folga regulamentar
-            </p>
-          </div>
-
-          <div className="bg-[#0e1626] border border-slate-800/80 rounded-xl p-4 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 h-1 w-full bg-blue-600" />
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Viaturas em Linha</p>
-                <h3 className="text-2xl font-black text-white mt-1">4 <span className="text-xs font-normal text-slate-400">em serviço</span></h3>
-              </div>
-              <div className="p-2.5 rounded-lg bg-blue-950/40 border border-blue-900/40 text-blue-400">
-                <Truck className="w-5 h-5" />
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> ABT-01, UR-02, ABS-03, L-01
-            </p>
-          </div>
-
-          <div className="bg-[#0e1626] border border-slate-800/80 rounded-xl p-4 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 h-1 w-full bg-amber-500" />
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">SEGs Abertas</p>
-                <h3 className="text-2xl font-black text-amber-400 mt-1">2 <span className="text-xs font-normal text-slate-400">editais</span></h3>
-              </div>
-              <div className="p-2.5 rounded-lg bg-amber-950/40 border border-amber-900/40 text-amber-400">
-                <CalendarCheck className="w-5 h-5" />
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> 6 vagas disponíveis no mobile
-            </p>
-          </div>
-
-          <div className="bg-[#0e1626] border border-slate-800/80 rounded-xl p-4 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 h-1 w-full bg-purple-600" />
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Permutas Pendentes</p>
-                <h3 className="text-2xl font-black text-purple-400 mt-1">{permutasPendentes.length} <span className="text-xs font-normal text-slate-400">p/ despacho</span></h3>
-              </div>
-              <div className="p-2.5 rounded-lg bg-purple-950/40 border border-purple-900/40 text-purple-400">
-                <FileCheck className="w-5 h-5" />
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-500" /> Aguardando aval do Comandante
-            </p>
-          </div>
-        </section>
-
+      {/* ÁREA CENTRAL */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         {/* ========================================================================= */}
-        {/* OS 4 GRANDES QUADROS POR CATEGORIA (ADMIN WEB)                             */}
+        {/* TELA A: HUB DE QUADROS GRANDES (QUANDO NENHUM MÓDULO ESTÁ ABERTO)         */}
         {/* ========================================================================= */}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-          {/* QUADRO 1: ADMINISTRAÇÃO & EFETIVO */}
-          {(activeTab === "todos" || activeTab === "efetivo") && (
-            <div className="bg-[#0c1424] border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col transition-all hover:border-slate-700">
-              <div className="bg-gradient-to-r from-red-950/70 via-slate-900 to-slate-900 p-4 border-b border-slate-800 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-red-600/20 text-red-400 border border-red-500/30">
-                    <Users className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-white tracking-wide">Quadro 1: Administração & Efetivo</h2>
-                    <p className="text-xs text-slate-400">Controle Cadastral, CNHs, Cursos e Funções Táticas</p>
-                  </div>
-                </div>
-                <span className="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700 font-mono">
-                  32 Cadastrados
-                </span>
+        {moduloAtivo === null ? (
+          <div className="space-y-8">
+            {/* Boas-Vindas e Resumo Operacional Limpo */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  Painel de Comando e Gestão
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  Selecione um dos 4 módulos abaixo para acessar as operações correspondentes.
+                </p>
               </div>
 
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-3">
-                  {/* Item Militar 1 */}
-                  <div className="bg-[#111c30] p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center font-bold text-white text-xs border border-slate-600">
-                        RP
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-white">Maj BM Rodrigo Albuquerque Paes</span>
-                          <span className="text-[10px] bg-red-900/50 text-red-300 font-semibold px-2 py-0.5 rounded border border-red-800">Comandante</span>
-                        </div>
-                        <p className="text-xs text-slate-400">RG: BM-12345 • QOBM Combatente • CNH B (Venc: 2028)</p>
-                      </div>
-                    </div>
-                    <span className="px-2.5 py-1 text-xs rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 font-medium">
-                      Ativo
-                    </span>
-                  </div>
-
-                  {/* Item Militar 2 */}
-                  <div className="bg-[#111c30] p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center font-bold text-white text-xs border border-slate-600">
-                        JM
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-white">Cap BM Juliana Matos Fernandes</span>
-                          <span className="text-[10px] bg-blue-900/50 text-blue-300 font-semibold px-2 py-0.5 rounded border border-blue-800">Oficial de Dia</span>
-                        </div>
-                        <p className="text-xs text-slate-400">RG: BM-23456 • QOBM Combatente • CNH B (Venc: 2027)</p>
-                      </div>
-                    </div>
-                    <span className="px-2.5 py-1 text-xs rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 font-medium">
-                      Ativo
-                    </span>
-                  </div>
-
-                  {/* Item Militar 3 */}
-                  <div className="bg-[#111c30] p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center font-bold text-white text-xs border border-slate-600">
-                        LM
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-white">Cb BM Lucas Mendes Souza</span>
-                          <span className="text-[10px] bg-amber-900/50 text-amber-300 font-semibold px-2 py-0.5 rounded border border-amber-800">Motorista ABT</span>
-                        </div>
-                        <p className="text-xs text-slate-400">RG: BM-45678 • QPBM • CNH Cat E (Alerta de Renovação Próxima)</p>
-                      </div>
-                    </div>
-                    <span className="px-2.5 py-1 text-xs rounded-full bg-amber-950/60 text-amber-400 border border-amber-800/60 font-medium">
-                      CNH 2026
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Integração com Supabase Auth & Storage para fotos e prontuários.</span>
-                  <button 
-                    onClick={() => alert("Módulo de Cadastro Rápido: Conectado à tabela 'perfis' do Supabase.")}
-                    className="flex items-center gap-1.5 text-red-400 hover:text-red-300 font-semibold"
-                  >
-                    Novo Cadastro de Militar <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+              <div className="flex items-center gap-2 bg-emerald-50 text-emerald-800 px-3.5 py-1.5 rounded-full border border-emerald-200 text-xs font-semibold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Prontidão de Serviço: <strong>Guarnição Alfa</strong></span>
               </div>
             </div>
-          )}
 
-          {/* QUADRO 2: LOGÍSTICA & ALMOXARIFADO */}
-          {(activeTab === "todos" || activeTab === "logistica") && (
-            <div className="bg-[#0c1424] border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col transition-all hover:border-slate-700">
-              <div className="bg-gradient-to-r from-blue-950/70 via-slate-900 to-slate-900 p-4 border-b border-slate-800 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30">
-                    <Truck className="w-5 h-5" />
+            {/* OS 4 QUADROS GRANDES COM AS CATEGORIAS DE ACESSO */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              {/* QUADRO 1: ADMINISTRAÇÃO & EFETIVO */}
+              <div
+                onClick={() => setModuloAtivo("efetivo")}
+                className="bg-white border-2 border-slate-200/80 hover:border-red-500 rounded-3xl p-7 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center group-hover:scale-105 group-hover:bg-red-600 group-hover:text-white transition-all">
+                      <Users className="w-7 h-7" />
+                    </div>
+                    <span className="text-xs font-bold bg-slate-100 text-slate-600 px-3 py-1 rounded-full border border-slate-200">
+                      32 Militares
+                    </span>
                   </div>
-                  <div>
-                    <h2 className="text-base font-bold text-white tracking-wide">Quadro 2: Logística & Almoxarifado</h2>
-                    <p className="text-xs text-slate-400">Tombamento, Cautelas Eletrônicas e Checklists Matinais 08h00</p>
+
+                  <h2 className="text-xl font-black text-slate-900 group-hover:text-red-600 transition-colors">
+                    1. Administração & Efetivo
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Controle cadastral completo da unidade, patentes, funções táticas, alertas de validade de CNHs e registro de cursos periódicos.
+                  </p>
+
+                  <div className="mt-5 space-y-1.5 pt-4 border-t border-slate-100 text-xs text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>Quadro de Oficiais e Praças atualizado</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                      <span>1 militar com CNH próxima do vencimento</span>
+                    </div>
                   </div>
                 </div>
-                <span className="text-xs bg-emerald-950/70 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-800/60 font-semibold">
-                  100% Conferido
-                </span>
+
+                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-red-600">
+                  <span>Acessar Módulo de Efetivo</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                </div>
               </div>
 
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-3">
-                  {/* Status das Viaturas */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-[#111c30] p-3 rounded-xl border border-slate-800">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-bold text-xs text-slate-200">ABT-01 (Bomba Tanque)</span>
-                        <span className="text-[10px] text-emerald-400 font-bold">100% OK</span>
-                      </div>
-                      <p className="text-[11px] text-slate-400">Água: 5.000 L • Combustível: Cheio</p>
-                      <div className="mt-2 text-[10px] text-slate-400 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Passagem Cb Lucas (08:00)
-                      </div>
+              {/* QUADRO 2: LOGÍSTICA & ALMOXARIFADO */}
+              <div
+                onClick={() => setModuloAtivo("logistica")}
+                className="bg-white border-2 border-slate-200/80 hover:border-blue-500 rounded-3xl p-7 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-105 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                      <Truck className="w-7 h-7" />
                     </div>
-
-                    <div className="bg-[#111c30] p-3 rounded-xl border border-slate-800">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-bold text-xs text-slate-200">UR-02 (Resgate / APH)</span>
-                        <span className="text-[10px] text-emerald-400 font-bold">100% OK</span>
-                      </div>
-                      <p className="text-[11px] text-slate-400">DEA Zoll OK • Cilindro O2 Cheio</p>
-                      <div className="mt-2 text-[10px] text-slate-400 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Passagem Sd Rocha (08:05)
-                      </div>
-                    </div>
+                    <span className="text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200">
+                      Viaturas 100% OK
+                    </span>
                   </div>
 
-                  {/* Cautela Ativa em Destaque */}
-                  <div className="bg-[#111c30] p-3.5 rounded-xl border border-slate-800">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                        <Radio className="w-3.5 h-3.5 text-amber-400" /> Cautela Ativa: Rádio APX2000 (#006)
-                      </span>
-                      <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
-                        Devolução: Hoje 19:00
-                      </span>
+                  <h2 className="text-xl font-black text-slate-900 group-hover:text-blue-600 transition-colors">
+                    2. Logística & Almoxarifado
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Livro de carga e tombamento, cautelas eletrônicas de equipamentos com assinatura digital e auditoria dos checklists matinais das 08h00.
+                  </p>
+
+                  <div className="mt-5 space-y-1.5 pt-4 border-t border-slate-100 text-xs text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>ABT-01, UR-02, ABS-03 e Lancha em linha</span>
                     </div>
-                    <p className="text-xs text-slate-400">
-                      Militar Responsável: <strong>1º Sgt Silva</strong> (Instrução Operacional no Rio Amazonas)
+                    <div className="flex items-center gap-2">
+                      <Radio className="w-3.5 h-3.5 text-blue-500" />
+                      <span>1 cautela ativa de rádio com devolução hoje</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600">
+                  <span>Acessar Módulo de Logística</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                </div>
+              </div>
+
+              {/* QUADRO 3: ESCALAS OPERACIONAIS & SEGs */}
+              <div
+                onClick={() => setModuloAtivo("escalas")}
+                className="bg-white border-2 border-slate-200/80 hover:border-amber-500 rounded-3xl p-7 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 group-hover:bg-amber-600 group-hover:text-white transition-all">
+                      <CalendarCheck className="w-7 h-7" />
+                    </div>
+                    <span className="text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-full border border-amber-200">
+                      2 Editais Abertos
+                    </span>
+                  </div>
+
+                  <h2 className="text-xl font-black text-slate-900 group-hover:text-amber-600 transition-colors">
+                    3. Escalas Operacionais & SEG
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Matriz mensal das guarnições (Alfa, Bravo, Charlie, Delta), abertura de Serviços Extras Gratificados e triagem automática de candidatos.
+                  </p>
+
+                  <div className="mt-5 space-y-1.5 pt-4 border-t border-slate-100 text-xs text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>Escala ordinária de Maio/2026 fechada</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CalendarCheck className="w-3.5 h-3.5 text-amber-500" />
+                      <span>6 vagas de SEG disponíveis para candidatura</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600">
+                  <span>Acessar Módulo de Escalas</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                </div>
+              </div>
+
+              {/* QUADRO 4: GESTÃO DOCUMENTAL & PERMUTAS */}
+              <div
+                onClick={() => setModuloAtivo("documental")}
+                className="bg-white border-2 border-slate-200/80 hover:border-purple-500 rounded-3xl p-7 shadow-sm hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-105 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                      <FileText className="w-7 h-7" />
+                    </div>
+                    <span className="text-xs font-bold bg-purple-50 text-purple-700 px-3 py-1 rounded-full border border-purple-200">
+                      {permutas.length} p/ Homologar
+                    </span>
+                  </div>
+
+                  <h2 className="text-xl font-black text-slate-900 group-hover:text-purple-600 transition-colors">
+                    4. Gestão Documental & Permutas
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Central de homologação de permutas pelo Comando, publicação de Boletins Internos (BI) e Gerais (BG) e geração de despachos timbrados.
+                  </p>
+
+                  <div className="mt-5 space-y-1.5 pt-4 border-t border-slate-100 text-xs text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <FileBadge2 className="w-3.5 h-3.5 text-purple-500" />
+                      <span>Último BI nº 042/2026 arquivado</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{permutas.length} permutas aguardando parecer</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-600">
+                  <span>Acessar Módulo Documental</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                </div>
+              </div>
+
+            </div>
+          </div>
+        ) : (
+          /* ========================================================================= */
+          /* TELA B: VISÃO DEDICADA DE UM MÓDULO (LIMPA, FOCO TOTAL, SEM POLUIÇÃO)     */
+          /* ========================================================================= */
+          <div className="space-y-6">
+            {/* Botão Superior para Voltar ao Hub de Quadros */}
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setModuloAtivo(null)}
+                className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-200 text-xs font-bold shadow-sm transition-all"
+              >
+                <ArrowLeft className="w-4 h-4" /> Voltar aos Módulos Principais
+              </button>
+
+              <div className="text-xs text-slate-500 font-medium">
+                Navegação: Hub Principal &gt; <strong className="text-slate-800 capitalize">{moduloAtivo}</strong>
+              </div>
+            </div>
+
+            {/* CONTEÚDO DO MÓDULO 1: ADMINISTRAÇÃO & EFETIVO */}
+            {moduloAtivo === "efetivo" && (
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900">
+                      Módulo 1: Administração & Efetivo
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Controle nominal, qualificação profissional e prontuário dos militares do 17º GBM.
                     </p>
                   </div>
-                </div>
-
-                <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Auditoria imutável garantida por trigger no Postgres.</span>
                   <button 
-                    onClick={() => alert("Acesso ao Livro de Carga Geral e Avarias do CBMAM.")}
-                    className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 font-semibold"
+                    onClick={() => alert("Formulário de cadastro aberto para inserção de novo militar no banco.")}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-md transition-all"
                   >
-                    Livro de Carga Completo <ChevronRight className="w-4 h-4" />
+                    <PlusCircle className="w-4 h-4" /> Novo Cadastro
                   </button>
                 </div>
-              </div>
-            </div>
-          )}
 
-          {/* QUADRO 3: ESCALAS OPERACIONAIS & SEGs */}
-          {(activeTab === "todos" || activeTab === "escalas") && (
-            <div className="bg-[#0c1424] border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col transition-all hover:border-slate-700">
-              <div className="bg-gradient-to-r from-amber-950/70 via-slate-900 to-slate-900 p-4 border-b border-slate-800 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-amber-600/20 text-amber-400 border border-amber-500/30">
-                    <CalendarCheck className="w-5 h-5" />
+                <div className="space-y-3">
+                  {[
+                    { nome: "Maj BM Rodrigo Albuquerque Paes", rg: "BM-12345", funcao: "Comandante da Unidade", cnh: "Cat B (2028)", status: "Ativo" },
+                    { nome: "Cap BM Juliana Matos Fernandes", rg: "BM-23456", funcao: "Oficial de Dia", cnh: "Cat B (2027)", status: "Ativo" },
+                    { nome: "1º Sgt BM Carlos Eduardo Silva", rg: "BM-34567", funcao: "Almoxarife / Mecânico", cnh: "Cat D (2027)", status: "Ativo" },
+                    { nome: "Cb BM Lucas Mendes Souza", rg: "BM-45678", funcao: "Motorista Socorrista ABT-01", cnh: "Cat E (Maio/2026 - Alerta)", status: "Ativo" },
+                    { nome: "Sd BM Thiago Rocha Lima", rg: "BM-56789", funcao: "Linha de Fogo / Resgate", cnh: "Cat B (2029)", status: "Ativo" },
+                  ].map((militar, idx) => (
+                    <div key={idx} className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-10 h-10 rounded-xl bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">
+                          {militar.nome.slice(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-slate-900">{militar.nome}</div>
+                          <div className="text-xs text-slate-500">
+                            RG: {militar.rg} • Função: {militar.funcao} • CNH: {militar.cnh}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full">
+                        {militar.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CONTEÚDO DO MÓDULO 2: LOGÍSTICA & ALMOXARIFADO */}
+            {moduloAtivo === "logistica" && (
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6">
+                <div className="pb-4 border-b border-slate-100">
+                  <h2 className="text-xl font-black text-slate-900">
+                    Módulo 2: Logística & Almoxarifado
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Conferência das viaturas, cautelas ativas e registros dos checklists matinais das 08h00.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                    <div className="flex justify-between items-center mb-1">
+                      <h4 className="text-sm font-bold text-slate-900">ABT-01 (Auto Bomba Tanque)</h4>
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">100% Operacional</span>
+                    </div>
+                    <p className="text-xs text-slate-500">Água: 5.000 L • Combustível: Cheio • Desencarcerador Lucas OK</p>
+                    <div className="mt-3 text-xs text-slate-600 flex items-center gap-1.5 font-medium">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      Checklist matinal conferido por Cb Lucas Mendes às 08:00
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-base font-bold text-white tracking-wide">Quadro 3: Escalas Operacionais & SEG</h2>
-                    <p className="text-xs text-slate-400">Matriz Mensal (Alfa/Bravo/Charlie/Delta) e Editais Extras</p>
+
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                    <div className="flex justify-between items-center mb-1">
+                      <h4 className="text-sm font-bold text-slate-900">UR-02 (Unidade de Resgate / APH)</h4>
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">100% Operacional</span>
+                    </div>
+                    <p className="text-xs text-slate-500">DEA Zoll OK • Cilindro de Oxigênio 100% • Prancha Rígida OK</p>
+                    <div className="mt-3 text-xs text-slate-600 flex items-center gap-1.5 font-medium">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      Checklist matinal conferido por Sd Rocha às 08:05
+                    </div>
                   </div>
                 </div>
-                <span className="text-xs bg-amber-950/70 text-amber-400 px-2.5 py-1 rounded-full border border-amber-800/60 font-semibold">
-                  2 SEGs Abertas
-                </span>
-              </div>
 
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-3">
-                  {/* Edital SEG 1 */}
-                  <div className="bg-[#111c30] p-3.5 rounded-xl border border-slate-800">
-                    <div className="flex justify-between items-start">
+                {/* Cautela em Andamento */}
+                <div className="p-4 bg-blue-50/60 border border-blue-200 rounded-2xl">
+                  <div className="flex items-center justify-between mb-1">
+                    <h4 className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                      <Radio className="w-4 h-4 text-blue-600" /> Cautela Ativa de Equipamento
+                    </h4>
+                    <span className="text-xs bg-white text-blue-700 font-bold px-2.5 py-0.5 rounded border border-blue-200">
+                      Devolução Prevista: Hoje às 19:00
+                    </span>
+                  </div>
+                  <p className="text-xs text-blue-950 mt-1">
+                    Rádio APX2000 (Tombamento #006) sob responsabilidade de <strong>1º Sgt Silva</strong> para instrução fluvial no Rio Amazonas.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* CONTEÚDO DO MÓDULO 3: ESCALAS OPERACIONAIS & SEGs */}
+            {moduloAtivo === "escalas" && (
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900">
+                      Módulo 3: Escalas Operacionais & SEG
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Grade mensal de serviço e editais de Serviço Extra Gratificado (SEG).
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => alert("Abertura de edital de SEG: Notificação instantânea disparada para o Mobile.")}
+                    className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-md transition-all"
+                  >
+                    <PlusCircle className="w-4 h-4" /> Publicar Novo Edital SEG
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-white">SEG - Operação Fecani / Orla do Rio</span>
-                          <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded font-bold">R$ 280,00</span>
+                          <h4 className="text-sm font-bold text-slate-900">SEG: Prevenção Aquática Orla de Itacoatiara</h4>
+                          <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">R$ 280,00</span>
                         </div>
-                        <p className="text-xs text-slate-400 mt-1">Data: Sábado (18:00 às 02:00) • 4 Vagas disponíveis</p>
+                        <p className="text-xs text-slate-500 mt-1">Sábado (14:00 às 22:00) • 4 Vagas disponíveis</p>
                       </div>
-                      <span className="text-xs text-amber-400 bg-amber-950/40 border border-amber-900/60 px-2 py-0.5 rounded">
-                        8 Candidatos
+                      <span className="text-xs font-bold text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
+                        8 Militares Candidatados
                       </span>
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs">
-                      <span className="text-slate-400">Critério: Menor qtd de SEGs no mês anterior</span>
+                    <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-xs">
+                      <span className="text-slate-500">Critério legal: menor quantidade de SEGs no mês vigente.</span>
                       <button 
-                        onClick={() => alert("Triagem automática de candidatos: militares sem impedimento de escala ordinária selecionados com sucesso!")}
-                        className="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-3 py-1 rounded transition-colors"
+                        onClick={() => alert("Triagem realizada com sucesso! Militares aptos selecionados e lista nominal gerada para o Boletim.")}
+                        className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-sm"
                       >
-                        Triar Candidatos
+                        Triar Candidatos Automaticamente
                       </button>
                     </div>
                   </div>
-
-                  {/* Edital SEG 2 */}
-                  <div className="bg-[#111c30] p-3.5 rounded-xl border border-slate-800">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-white">SEG - Guarda-Vidas Prainha Itacoatiara</span>
-                          <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded font-bold">R$ 250,00</span>
-                        </div>
-                        <p className="text-xs text-slate-400 mt-1">Data: Domingo (08:00 às 17:00) • 2 Vagas</p>
-                      </div>
-                      <span className="text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-900/60 px-2 py-0.5 rounded">
-                        Homologada
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Notificação push instantânea para o aplicativo mobile.</span>
-                  <button 
-                    onClick={() => alert("Abertura de novo Edital de SEG: Dispara evento no Realtime do Supabase.")}
-                    className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-semibold"
-                  >
-                    Publicar Nova SEG <ChevronRight className="w-4 h-4" />
-                  </button>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* QUADRO 4: GESTÃO DOCUMENTAL & COMANDO */}
-          {(activeTab === "todos" || activeTab === "documental") && (
-            <div className="bg-[#0c1424] border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col transition-all hover:border-slate-700">
-              <div className="bg-gradient-to-r from-purple-950/70 via-slate-900 to-slate-900 p-4 border-b border-slate-800 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-purple-600/20 text-purple-400 border border-purple-500/30">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-white tracking-wide">Quadro 4: Documentos & Central de Permutas</h2>
-                    <p className="text-xs text-slate-400">Homologação do Comando, Boletins BI/BG e Despachos Oficiais</p>
-                  </div>
+            {/* CONTEÚDO DO MÓDULO 4: GESTÃO DOCUMENTAL & PERMUTAS */}
+            {moduloAtivo === "documental" && (
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6">
+                <div className="pb-4 border-b border-slate-100">
+                  <h2 className="text-xl font-black text-slate-900">
+                    Módulo 4: Gestão Documental & Central de Permutas
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Homologação de trocas de serviço pelo Comando e publicação de boletins oficiais.
+                  </p>
                 </div>
-                <span className="text-xs bg-purple-950/70 text-purple-400 px-2.5 py-1 rounded-full border border-purple-800/60 font-semibold">
-                  {permutasPendentes.length} Pendente(s)
-                </span>
-              </div>
 
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-3">
-                  {permutasPendentes.length === 0 ? (
-                    <div className="bg-[#111c30] p-6 rounded-xl border border-slate-800 text-center">
-                      <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-                      <p className="text-sm font-semibold text-slate-200">Todas as permutas foram homologadas!</p>
-                      <p className="text-xs text-slate-400 mt-1">Escalas e registros atualizados no Supabase.</p>
+                <div>
+                  <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
+                    Permutas Aguardando Parecer do Comando ({permutas.length})
+                  </h3>
+
+                  {permutas.length === 0 ? (
+                    <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl">
+                      <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
+                      <p className="text-sm font-bold text-slate-800">Todas as permutas foram homologadas!</p>
+                      <p className="text-xs text-slate-500 mt-0.5">As escalas foram automaticamente atualizadas no banco.</p>
                     </div>
                   ) : (
-                    permutasPendentes.map(permuta => (
-                      <div key={permuta.id} className="bg-[#111c30] p-3.5 rounded-xl border border-slate-800">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-purple-300">
-                            {permuta.solicitante} ⇄ {permuta.substituto}
-                          </span>
-                          <span className="text-[10px] bg-amber-950 text-amber-400 px-2 py-0.5 rounded font-medium">
-                            Aguardando Comandante
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-300 mt-1.5">
-                          <strong>Original:</strong> {permuta.dataOriginal} • <strong>Paga:</strong> {permuta.dataPaga} ({permuta.posto})
-                        </p>
-                        <p className="text-[11px] text-slate-400 mt-1 italic">
-                          "{permuta.motivo}"
-                        </p>
+                    <div className="space-y-3">
+                      {permutas.map(permuta => (
+                        <div key={permuta.id} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                            <span className="text-sm font-bold text-purple-900">
+                              {permuta.solicitante} ⇄ {permuta.substituto}
+                            </span>
+                            <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-0.5 rounded-full">
+                              Aguardando Decisão do Comandante
+                            </span>
+                          </div>
 
-                        <div className="mt-3 flex items-center justify-end gap-2 pt-2 border-t border-slate-800/60">
-                          <button
-                            onClick={() => aprovarPermuta(permuta.id, false)}
-                            className="flex items-center gap-1 px-3 py-1 bg-red-950 hover:bg-red-900 text-red-300 text-xs rounded border border-red-800 transition-colors"
-                          >
-                            <X className="w-3.5 h-3.5" /> Indeferir
-                          </button>
-                          <button
-                            onClick={() => aprovarPermuta(permuta.id, true)}
-                            className="flex items-center gap-1 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded shadow-md shadow-emerald-950 transition-colors"
-                          >
-                            <Check className="w-3.5 h-3.5" /> Deferir e Publicar
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                          <p className="text-xs text-slate-700">
+                            <strong>Data Original:</strong> {permuta.dataOriginal} • <strong>Data da Paga:</strong> {permuta.dataPaga} ({permuta.posto})
+                          </p>
+                          <p className="text-xs text-slate-500 italic bg-white p-2.5 rounded-lg border border-slate-200">
+                            "{permuta.motivo}"
+                          </p>
 
-                  {/* Publicação de BI */}
-                  <div className="bg-[#111c30] p-3 rounded-xl border border-slate-800 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <FileCheck className="w-4 h-4 text-purple-400" />
-                      <div>
-                        <div className="text-xs font-bold text-slate-200">Boletim Interno nº 042/2026</div>
-                        <div className="text-[10px] text-slate-400">Publicado em 23/10/2026 pelo Maj BM Rodrigo</div>
-                      </div>
+                          <div className="pt-2 flex justify-end gap-2">
+                            <button
+                              onClick={() => aprovarPermuta(permuta.id, false)}
+                              className="px-3 py-1.5 bg-white hover:bg-red-50 text-red-600 border border-red-200 text-xs font-bold rounded-lg transition-colors flex items-center gap-1"
+                            >
+                              <X className="w-3.5 h-3.5" /> Indeferir
+                            </button>
+                            <button
+                              onClick={() => aprovarPermuta(permuta.id, true)}
+                              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center gap-1"
+                            >
+                              <Check className="w-3.5 h-3.5" /> Deferir e Publicar Despacho
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <button 
-                      onClick={() => alert("Download/Visualização do PDF com timbre oficial CBMAM.")}
-                      className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 font-semibold"
-                    >
-                      Ver PDF <ExternalLink className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Despachos gerados com timbre oficial do CBMAM.</span>
-                  <button 
-                    onClick={() => alert("Upload de novo Boletim Interno / Geral: Gera notificação automática no feed mobile.")}
-                    className="flex items-center gap-1.5 text-purple-400 hover:text-purple-300 font-semibold"
-                  >
-                    Publicar Novo Boletim <ChevronRight className="w-4 h-4" />
-                  </button>
+                  )}
                 </div>
               </div>
-            </div>
-          )}
-
-        </div>
-
-        {/* FEED OPERACIONAL EM TEMPO REAL (CANAL DE INTEGRAÇÃO COM O APP MOBILE) */}
-        <section className="bg-[#0c1424] border border-slate-800 rounded-2xl p-5 shadow-xl">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
-              </span>
-              <h3 className="text-base font-bold text-white tracking-wide">
-                Feed Operacional Integrado (Realtime Quartel)
-              </h3>
-            </div>
-            <span className="text-xs text-slate-400 font-mono">
-              Sincronizado com App Mobile da Guarnição
-            </span>
+            )}
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="bg-[#111c30] p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-red-400 bg-red-950/60 px-2 py-0.5 rounded border border-red-900/60">
-                  Aviso CMT • Pinado
-                </span>
-                <h4 className="text-xs font-bold text-white mt-2">Diretriz Operacional Fecani</h4>
-                <p className="text-[11px] text-slate-400 mt-1">
-                  Revisão completa das embarcações de resgate e testes dos motores de popa no Rio Amazonas.
-                </p>
-              </div>
-              <p className="text-[10px] text-slate-500 mt-3 font-mono">Há 2 horas • Por Maj BM Rodrigo</p>
-            </div>
-
-            <div className="bg-[#111c30] p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-900/60">
-                  Checklist Matinal
-                </span>
-                <h4 className="text-xs font-bold text-white mt-2">ABT-01 100% Operacional</h4>
-                <p className="text-[11px] text-slate-400 mt-1">
-                  Conferência matinal das 08h00 finalizada pelo Cb Lucas Mendes sem avarias de equipamentos.
-                </p>
-              </div>
-              <p className="text-[10px] text-slate-500 mt-3 font-mono">Hoje às 08:00 • Guarnição Alfa</p>
-            </div>
-
-            <div className="bg-[#111c30] p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-900/60">
-                  Edital SEG Aberto
-                </span>
-                <h4 className="text-xs font-bold text-white mt-2">Vagas para Salvamento na Orla</h4>
-                <p className="text-[11px] text-slate-400 mt-1">
-                  Inscrições abertas no App Mobile para serviço no fim de semana. Vagas prioritárias por escala.
-                </p>
-              </div>
-              <p className="text-[10px] text-slate-500 mt-3 font-mono">Ontem • Adm do Comando</p>
-            </div>
-          </div>
-        </section>
+        )}
       </main>
 
-      {/* RODAPÉ INSTITUCIONAL */}
-      <footer className="border-t border-slate-800/80 bg-[#090d16] py-4 text-center text-xs text-slate-500">
-        <p>SIGO-CBMAM • Destacamento Bombeiro Militar de Itacoatiara – Amazonas</p>
-        <p className="text-[10px] text-slate-600 mt-1">
-          Hospedado na Vercel • Supabase Database & Auth • CI/CD via GitHub Actions
-        </p>
+      {/* RODAPÉ CLEAN */}
+      <footer className="border-t border-slate-200/80 bg-white py-4 text-center text-xs text-slate-400">
+        SIGO 17º GBM • Corpo de Bombeiros Militar de Itacoatiara – AM
       </footer>
     </div>
   );

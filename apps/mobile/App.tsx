@@ -7,10 +7,12 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentTab, setCurrentTab] = useState<'feed' | 'escala' | 'checklist' | 'permutas'>('feed');
   
   // Checklist interativo
@@ -24,33 +26,65 @@ export default function App() {
 
   const [candidatadoSeg, setCandidatadoSeg] = useState(false);
 
+  // =========================================================================
+  // TELA DE LOGIN MOBILE (TEMA CLARO E LIMPO)
+  // =========================================================================
+  if (!isLoggedIn) {
+    return (
+      <SafeAreaView style={styles.loginContainer}>
+        <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
+        <View style={styles.loginCard}>
+          <Image
+            source={require('./assets/logo.png')}
+            style={styles.loginLogo}
+            resizeMode="contain"
+          />
+          <Text style={styles.loginTitle}>SIGO — 17º GBM</Text>
+          <Text style={styles.loginSubtitle}>Corpo de Bombeiros Militar de Itacoatiara</Text>
+
+          <TouchableOpacity
+            style={styles.loginBtn}
+            onPress={() => setIsLoggedIn(true)}
+          >
+            <Text style={styles.loginBtnText}>Entrar como Guarnição de Serviço</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // =========================================================================
+  // TELA PRINCIPAL PÓS-LOGIN MOBILE (4 ABAS LIMPAS)
+  // =========================================================================
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0c1322" />
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
       {/* TOP BAR: IDENTIFICAÇÃO MILITAR E PRONTIDÃO */}
       <View style={styles.topBar}>
         <View style={styles.topBarLeft}>
-          <View style={styles.badgeCbmam}>
-            <Text style={styles.badgeCbmamText}>CBMAM</Text>
-          </View>
+          <Image
+            source={require('./assets/logo.png')}
+            style={styles.topLogo}
+            resizeMode="contain"
+          />
           <View>
             <Text style={styles.militarNome}>Sd BM Rocha</Text>
-            <Text style={styles.militarStatus}>Guarnição Alfa • ABT-01 Itacoatiara</Text>
+            <Text style={styles.militarStatus}>17º GBM • Guarnição Alfa (ABT-01)</Text>
           </View>
         </View>
         <TouchableOpacity 
-          style={styles.notifBtn} 
-          onPress={() => Alert.alert('Notificações', 'Você não possui avisos urgentes pendentes.')}
+          style={styles.logoutBtn} 
+          onPress={() => setIsLoggedIn(false)}
         >
-          <Text style={styles.notifBtnText}>🔔</Text>
+          <Text style={styles.logoutBtnText}>Sair</Text>
         </TouchableOpacity>
       </View>
 
       {/* CONTEÚDO DA ABA SELECIONADA */}
       <ScrollView style={styles.contentArea} contentContainerStyle={{ paddingBottom: 30 }}>
 
-        {/* ABA 1: FEED OPERACIONAL ("REDE SOCIAL DO QUARTEL") */}
+        {/* ABA 1: FEED OPERACIONAL */}
         {currentTab === 'feed' && (
           <View>
             <Text style={styles.sectionTitle}>Feed Operacional em Tempo Real</Text>
@@ -59,20 +93,20 @@ export default function App() {
             <View style={[styles.card, styles.pinnedCard]}>
               <View style={styles.cardHeader}>
                 <Text style={styles.tagAvisoCmt}>📌 AVISO DO COMANDANTE</Text>
-                <Text style={styles.cardTime}>Há 2 horas</Text>
+                <Text style={styles.cardTime}>Há 2h</Text>
               </View>
-              <Text style={styles.cardTitle}>Diretriz Operacional do Festival da Canção (Fecani)</Text>
+              <Text style={styles.cardTitle}>Diretriz Operacional do Festival (Fecani)</Text>
               <Text style={styles.cardBody}>
-                Todos os militares escalados devem se atentar às normas de segurança para contenção aquática e prontidão no Rio Amazonas.
+                Todos os militares de serviço devem redobrar a atenção na contenção aquática e prontidão no Rio Amazonas.
               </Text>
-              <Text style={styles.cardAuthor}>Por: Maj BM Rodrigo (Comandante da Unidade)</Text>
+              <Text style={styles.cardAuthor}>Maj BM Rodrigo • Comandante do 17º GBM</Text>
             </View>
 
-            {/* Checklist Matinal Concluído */}
+            {/* Checklist Matinal */}
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <Text style={styles.tagChecklist}>✅ CHECKLIST 08H00</Text>
-                <Text style={styles.cardTime}>Hoje 08:15</Text>
+                <Text style={styles.cardTime}>08:15</Text>
               </View>
               <Text style={styles.cardTitle}>Viatura ABT-01 Liberada (100% Operacional)</Text>
               <Text style={styles.cardBody}>
@@ -80,15 +114,15 @@ export default function App() {
               </Text>
             </View>
 
-            {/* Nova SEG Aberta */}
+            {/* Nova SEG */}
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <Text style={styles.tagSeg}>⭐ NOVA SEG ABERTA</Text>
                 <Text style={styles.cardTime}>Ontem</Text>
               </View>
-              <Text style={styles.cardTitle}>Edital SEG: Salvamento Prainha de Itacoatiara</Text>
+              <Text style={styles.cardTitle}>Edital SEG: Salvamento Orla de Itacoatiara</Text>
               <Text style={styles.cardBody}>
-                Remuneração: R$ 280,00 • Turno de 8h no fim de semana. Acesse a aba Escala/SEG para se inscrever.
+                Remuneração: R$ 280,00 • Turno de 8h. Acesse a aba Escala/SEG para se candidatar.
               </Text>
             </View>
           </View>
@@ -99,22 +133,20 @@ export default function App() {
           <View>
             <Text style={styles.sectionTitle}>Minha Escala & Serviços Extras</Text>
             
-            {/* Card Minha Escala */}
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Status de Escala Pessoal</Text>
               <View style={styles.escalaRow}>
                 <View style={styles.escalaItem}>
                   <Text style={styles.escalaLabel}>Hoje (23/10)</Text>
-                  <Text style={[styles.escalaValue, { color: '#ef4444' }]}>PRONTIDÃO (Alfa)</Text>
+                  <Text style={[styles.escalaValue, { color: '#dc2626' }]}>PRONTIDÃO (Alfa)</Text>
                 </View>
                 <View style={styles.escalaItem}>
                   <Text style={styles.escalaLabel}>Amanhã (24/10)</Text>
-                  <Text style={[styles.escalaValue, { color: '#10b981' }]}>FOLGA 1º DIA</Text>
+                  <Text style={[styles.escalaValue, { color: '#16a34a' }]}>FOLGA 1º DIA</Text>
                 </View>
               </View>
             </View>
 
-            {/* SEG Disponível para Candidatura */}
             <Text style={[styles.sectionTitle, { marginTop: 15 }]}>Editais de SEG Disponíveis</Text>
             <View style={styles.card}>
               <View style={styles.cardHeader}>
@@ -125,18 +157,18 @@ export default function App() {
               <Text style={styles.cardBody}>
                 Data: Sábado, 26/10 • 14:00 às 22:00{'\n'}
                 Valor: R$ 280,00{'\n'}
-                Uniforme: 5º RBM (Operacional Leve/Bermuda Térmica)
+                Uniforme: 5º RBM (Operacional Leve)
               </Text>
 
               <TouchableOpacity 
-                style={[styles.primaryBtn, candidatadoSeg && { backgroundColor: '#10b981' }]}
+                style={[styles.primaryBtn, candidatadoSeg && { backgroundColor: '#16a34a' }]}
                 onPress={() => {
                   setCandidatadoSeg(!candidatadoSeg);
                   Alert.alert('SEG CBMAM', candidatadoSeg ? 'Candidatura cancelada.' : 'Candidatura realizada com sucesso! Critério de seleção: menor número de SEGs no mês.');
                 }}
               >
                 <Text style={styles.primaryBtnText}>
-                  {candidatadoSeg ? '✓ Candidatura Confirmada (Fila)' : 'Candidatar-se à Vaga'}
+                  {candidatadoSeg ? '✓ Candidatura Confirmada' : 'Candidatar-se à Vaga'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -150,7 +182,7 @@ export default function App() {
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Viatura: UR-02 (Resgate e APH)</Text>
               <Text style={styles.cardBody}>
-                Confira fisicamente cada item antes de assumir o socorro. Conforme diretriz CBMAM, checklist finalizado é imutável.
+                Confira os itens antes de assumir o socorro. O checklist concluído é imutável para efeitos de auditoria.
               </Text>
 
               <View style={{ marginTop: 12 }}>
@@ -180,16 +212,16 @@ export default function App() {
         {/* ABA 4: PERMUTAS */}
         {currentTab === 'permutas' && (
           <View>
-            <Text style={styles.sectionTitle}>Central de Permutas de Serviço</Text>
+            <Text style={styles.sectionTitle}>Central de Permutas</Text>
             
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Minha Solicitação Atual</Text>
               <View style={{ marginTop: 8 }}>
                 <Text style={styles.cardBody}>
-                  • Solicitante: <Text style={{ color: '#fff', fontWeight: 'bold' }}>Sd BM Rocha</Text>{'\n'}
-                  • Substituto: <Text style={{ color: '#fff', fontWeight: 'bold' }}>Sd BM Lima</Text>{'\n'}
-                  • Data Original: 14/05/2026 (Guarnição Alfa){'\n'}
-                  • Data Paga: 22/05/2026 (Guarnição Bravo)
+                  • Solicitante: Sd BM Rocha{'\n'}
+                  • Substituto: Sd BM Lima{'\n'}
+                  • Data Original: 14/05/2026 (Alfa){'\n'}
+                  • Data Paga: 22/05/2026 (Bravo)
                 </Text>
                 
                 <View style={styles.statusBadge}>
@@ -200,7 +232,7 @@ export default function App() {
 
             <TouchableOpacity 
               style={[styles.primaryBtn, { marginTop: 15 }]}
-              onPress={() => Alert.alert('Nova Permuta', 'Abra o formulário para selecionar o militar parceiro e datas de compensação.')}
+              onPress={() => Alert.alert('Nova Permuta', 'Abra o formulário para selecionar o parceiro e datas.')}
             >
               <Text style={styles.primaryBtnText}>+ Propor Nova Permuta</Text>
             </TouchableOpacity>
@@ -248,16 +280,65 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  loginContainer: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loginCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 24,
+    width: '100%',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#64748b',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  loginLogo: {
+    width: 110,
+    height: 110,
+    marginBottom: 10,
+  },
+  loginTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#0f172a',
+  },
+  loginSubtitle: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 4,
+    marginBottom: 20,
+  },
+  loginBtn: {
+    backgroundColor: '#dc2626',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    width: '100%',
+    alignItems: 'center',
+  },
+  loginBtnText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#070b12',
+    backgroundColor: '#f8fafc',
   },
   topBar: {
-    backgroundColor: '#0c1322',
+    backgroundColor: '#ffffff',
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
+    borderBottomColor: '#e2e8f0',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -267,34 +348,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  badgeCbmam: {
-    backgroundColor: '#dc2626',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  badgeCbmamText: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: '900',
-    letterSpacing: 1,
+  topLogo: {
+    width: 38,
+    height: 38,
   },
   militarNome: {
-    color: '#fff',
-    fontSize: 15,
+    color: '#0f172a',
+    fontSize: 14,
     fontWeight: 'bold',
   },
   militarStatus: {
-    color: '#94a3b8',
+    color: '#64748b',
     fontSize: 11,
   },
-  notifBtn: {
-    padding: 8,
-    backgroundColor: '#1e293b',
+  logoutBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#f1f5f9',
     borderRadius: 8,
   },
-  notifBtnText: {
-    fontSize: 16,
+  logoutBtnText: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '600',
   },
   contentArea: {
     flex: 1,
@@ -302,22 +378,22 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   sectionTitle: {
-    color: '#f8fafc',
+    color: '#0f172a',
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 12,
   },
   card: {
-    backgroundColor: '#0f172a',
-    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
     padding: 14,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#1e293b',
+    borderColor: '#e2e8f0',
   },
   pinnedCard: {
-    borderColor: '#dc2626',
-    backgroundColor: '#16131d',
+    borderColor: '#fca5a5',
+    backgroundColor: '#fffaf9',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -326,37 +402,37 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   tagAvisoCmt: {
-    color: '#f87171',
+    color: '#dc2626',
     fontSize: 10,
     fontWeight: 'bold',
   },
   tagChecklist: {
-    color: '#34d399',
+    color: '#16a34a',
     fontSize: 10,
     fontWeight: 'bold',
   },
   tagSeg: {
-    color: '#fbbf24',
+    color: '#d97706',
     fontSize: 10,
     fontWeight: 'bold',
   },
   cardTime: {
-    color: '#64748b',
+    color: '#94a3b8',
     fontSize: 10,
   },
   cardTitle: {
-    color: '#fff',
+    color: '#0f172a',
     fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   cardBody: {
-    color: '#94a3b8',
+    color: '#475569',
     fontSize: 12,
     lineHeight: 18,
   },
   cardAuthor: {
-    color: '#cbd5e1',
+    color: '#64748b',
     fontSize: 11,
     marginTop: 8,
     fontStyle: 'italic',
@@ -368,12 +444,14 @@ const styles = StyleSheet.create({
   },
   escalaItem: {
     flex: 1,
-    backgroundColor: '#1e293b',
+    backgroundColor: '#f8fafc',
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   escalaLabel: {
-    color: '#94a3b8',
+    color: '#64748b',
     fontSize: 11,
     marginBottom: 4,
   },
@@ -384,7 +462,7 @@ const styles = StyleSheet.create({
   primaryBtn: {
     backgroundColor: '#2563eb',
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 12,
   },
@@ -399,43 +477,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
+    borderBottomColor: '#f1f5f9',
   },
   checklistItemText: {
-    color: '#e2e8f0',
+    color: '#1e293b',
     fontSize: 12,
     flex: 1,
   },
   okPill: {
-    backgroundColor: '#064e3b',
+    backgroundColor: '#ecfdf5',
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#059669',
+    borderColor: '#a7f3d0',
   },
   okPillText: {
-    color: '#34d399',
+    color: '#059669',
     fontSize: 11,
     fontWeight: 'bold',
   },
   statusBadge: {
     marginTop: 10,
-    backgroundColor: '#451a03',
+    backgroundColor: '#fef3c7',
     padding: 8,
-    borderRadius: 6,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#b45309',
+    borderColor: '#fde68a',
   },
   statusBadgeText: {
-    color: '#fde68a',
+    color: '#92400e',
     fontSize: 11,
     fontWeight: '600',
   },
   bottomBar: {
-    backgroundColor: '#0c1322',
+    backgroundColor: '#ffffff',
     borderTopWidth: 1,
-    borderTopColor: '#1e293b',
+    borderTopColor: '#e2e8f0',
     flexDirection: 'row',
     paddingVertical: 8,
     paddingBottom: 16,
@@ -447,7 +525,7 @@ const styles = StyleSheet.create({
   },
   tabIcon: {
     fontSize: 18,
-    color: '#64748b',
+    color: '#94a3b8',
   },
   tabLabel: {
     fontSize: 10,
@@ -456,6 +534,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   tabActiveText: {
-    color: '#ef4444',
+    color: '#dc2626',
+    fontWeight: 'bold',
   },
 });
