@@ -1,0 +1,25 @@
+{
+  "name": "sigo-cbmam",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema Integrado de Gestão Operacional e Administrativa - CBMAM Itacoatiara",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:mobile": "npm run start --workspace=apps/mobile",
+    "build:web": "npm run build --workspace=apps/web"
+  },
+  "keywords": [
+    "cbmam",
+    "bombeiros",
+    "itacoatiara",
+    "gestao-operacional",
+    "supabase",
+    "nextjs",
+    "expo"
+  ],
+  "author": "CBMAM Itacoatiara",
+  "license": "UNLICENSED"
+}
